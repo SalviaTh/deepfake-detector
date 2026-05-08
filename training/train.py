@@ -31,7 +31,7 @@ class DeepFakeDetector(nn.Module):
 
 
 # ── Training loop ──────────────────────────────────────────────────────
-def train(epochs=30, batch_size=16, lr=1e-4):
+def train(epochs=15, batch_size=16, lr=1e-4):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"Training on: {device}")
 

@@ -1,8 +1,7 @@
 # DeepFake Detector
 
-A full-stack application designed to detect deepfake images and videos using state-of-the-art Deep Learning techniques. The project features a robust EfficientNet-B4 backbone and provides explainable AI through Grad-CAM visualizations.
-
-## 🚀 Features
+A full-stack application designed to detect deepfake images and videos using state-of-the-art Deep Learning techniques. 
+## Features
 
 - **Image Detection**: Upload images to detect face manipulations with high confidence.
 - **Video Analysis**: Analyze video segments frame-by-frame with per-frame scoring and overall verdict.
@@ -65,26 +64,6 @@ graph TD
 
 ---
 
-## 📂 Project Structure
-
-```text
-├── backend/            # FastAPI server & inference logic
-│   ├── main.py         # API endpoints and startup
-│   ├── model.py        # Deep learning model definition
-│   ├── preprocess.py   # Image/Video processing utilities
-│   └── gradcam.py      # Explainability logic
-├── frontend/           # React application (Vite)
-│   ├── src/            # Components and application logic
-│   └── public/         # Static assets
-├── training/           # Scripts for model training & evaluation
-│   ├── train.py        # Training loop
-│   ├── dataset.py      # Custom PyTorch Dataset
-│   └── evaluate.py     # Metrics and performance testing
-├── models/             # Saved model weights (.pth)
-└── requirements.txt    # Python dependencies
-```
-
----
 
 ## ⚙️ Installation & Setup
 
@@ -113,4 +92,4 @@ graph TD
 ---
 
 ## 📊 Dataset & Training
-The model was trained on the **FaceForensics++** dataset, utilizing data augmentation techniques via the `albumentations` library to improve robustness against various compression and manipulation artifacts.
+The model was trained on the 
