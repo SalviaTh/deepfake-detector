@@ -92,4 +92,4 @@ graph TD
 ---
 
 ## 📊 Dataset & Training
-The model was trained on the 
+The 140k Real and Fake Faces dataset from Kaggle is used for training.
