@@ -1,0 +1,13 @@
+torch
+torchvision
+torchaudio
+fastapi
+uvicorn
+python-multipart
+opencv-python-headless
+facenet-pytorch
+albumentations
+pillow
+numpy
+scipy
+efficientnet_pytorch
