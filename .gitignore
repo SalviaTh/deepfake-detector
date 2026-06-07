@@ -159,8 +159,6 @@ dist-ssr/
 
 # Project specific
 data/
-models/*.pth
-models/*.h5
 *.zip
 *.csv
 tmp/
