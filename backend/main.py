@@ -13,8 +13,10 @@ app = FastAPI(title="DeepFake Detector API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Vite dev server
-    allow_methods=["*"], allow_headers=["*"],
+    allow_origins=["*"],  # Allows frontend to connect from any URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ── Load model once at startup ─────────────────────────────────────────
@@ -51,39 +53,66 @@ async def detect_image(file: UploadFile = File(...)):
     if bgr is None:
         raise HTTPException(400, "Could not decode image")
 
-    # 1. Face detection and crop
-    face_bgr, bbox = extract_face(bgr)
-    if face_bgr is None:
-        raise HTTPException(422, "No face detected in image")
-
-    # 2. Preprocess for model
-    face_rgb = cv2.cvtColor(face_bgr, cv2.COLOR_BGR2RGB)
-    pil_img  = Image.fromarray(face_rgb)
-    tensor   = TRANSFORM(pil_img).unsqueeze(0).to(DEVICE)
-
-    # 3. Grad-CAM inference
-    # Let the model predict the class first, then generate heatmap for that prediction
-    heatmap, label, confidence = grad_cam.generate(tensor) 
+    # ── PASS 1: Global Analysis (Clothing, Background, Context) ──
+    full_rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
+    full_pil = Image.fromarray(full_rgb)
+    full_tensor = TRANSFORM(full_pil).unsqueeze(0).to(DEVICE)
     
-    # If it predicts REAL but with very low confidence, or if you specifically want 
-    # to see fake regions, you could also generate heatmap for target_class=1.
-    # For now, we follow the model's top prediction.
+    with torch.no_grad():
+        full_logits = model(full_tensor)
+        full_fake_prob = torch.softmax(full_logits, 1)[0, 1].item()
 
-    # 4. Overlay heatmap on original face crop
-    overlay_bgr = GradCAM.overlay(face_bgr, heatmap)
-    _, buffer    = cv2.imencode('.jpg', overlay_bgr)
-    heatmap_b64  = base64.b64encode(buffer).decode()
+    # ── PASS 2: Face-Level Analysis (Swaps, Expressions) ──
+    face_bgr, bbox = extract_face(bgr)
+    
+    if face_bgr is not None:
+        # Use Grad-CAM on the face for precise visualization
+        face_rgb = cv2.cvtColor(face_bgr, cv2.COLOR_BGR2RGB)
+        face_pil = Image.fromarray(face_rgb)
+        face_tensor = TRANSFORM(face_pil).unsqueeze(0).to(DEVICE)
+        
+        heatmap, pred_idx, probs = grad_cam.generate(face_tensor)
+        face_fake_prob = probs[1].item()
+        
+        overlay_bgr = GradCAM.overlay(face_bgr, heatmap)
+        _, buffer = cv2.imencode('.jpg', overlay_bgr)
+        heatmap_b64 = base64.b64encode(buffer).decode()
+        
+        _, orig_buf = cv2.imencode('.jpg', face_bgr)
+        face_b64 = base64.b64encode(orig_buf).decode()
+    else:
+        # If no face, run Grad-CAM on the full image to see what's suspicious
+        heatmap, pred_idx, probs = grad_cam.generate(full_tensor)
+        face_fake_prob = probs[1].item()
+        
+        overlay_bgr = GradCAM.overlay(bgr, heatmap)
+        _, buffer = cv2.imencode('.jpg', overlay_bgr)
+        heatmap_b64 = base64.b64encode(buffer).decode()
+        face_b64 = None
+        bbox = None
 
-    # 5. Also encode original cropped face
-    _, orig_buf = cv2.imencode('.jpg', face_bgr)
-    orig_b64    = base64.b64encode(orig_buf).decode()
+    # ── Final Decision Logic ──
+    # We take the maximum suspiciousness (FAKE probability) from either check
+    final_fake_prob = max(full_fake_prob, face_fake_prob)
+    
+    if final_fake_prob > 0.5:
+        label = "FAKE"
+        confidence = final_fake_prob
+    else:
+        label = "REAL"
+        confidence = 1.0 - final_fake_prob
 
     return JSONResponse({
-        "label":       label,          # "REAL" | "FAKE"
-        "confidence":  round(confidence * 100, 2),
-        "bbox":        bbox,            # [x, y, w, h]
-        "face_image":  orig_b64,
-        "heatmap":     heatmap_b64,    # base64 JPEG with heatmap overlay
+        "label": label,
+        "confidence": round(confidence * 100, 2),
+        "bbox": bbox,
+        "face_image": face_b64,
+        "heatmap": heatmap_b64,
+        "analysis_details": {
+            "global_score": round(full_fake_prob * 100, 2),
+            "face_score": round(face_fake_prob * 100, 2),
+            "face_detected": face_bgr is not None
+        }
     })
 
 

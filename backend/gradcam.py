@@ -58,10 +58,9 @@ class GradCAM:
         heatmap = heatmap.detach().cpu().numpy()
         
         # Prediction info
-        label = "FAKE" if target_class == 1 else "REAL"
-        confidence = torch.softmax(output, dim=1)[0, target_class].item()
+        probs = torch.softmax(output, dim=1)[0].detach().cpu().numpy()
         
-        return heatmap, label, confidence
+        return heatmap, target_class, probs
 
     @staticmethod
     def overlay(img_bgr, heatmap):

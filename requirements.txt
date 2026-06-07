@@ -11,3 +11,6 @@ pillow
 numpy
 scipy
 efficientnet_pytorch
+scikit-learn
+matplotlib
+seaborn
