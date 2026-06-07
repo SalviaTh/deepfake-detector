@@ -4,7 +4,8 @@ import ReactCrop from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import './App.css'
 
-const API = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : '')
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : '')
+const API = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE
 
 export default function App() {
   const [file, setFile] = useState(null)
