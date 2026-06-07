@@ -14,7 +14,7 @@ app = FastAPI(title="DeepFake Detector API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allows frontend to connect from any URL
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
