@@ -40,6 +40,7 @@ export default function App() {
 
   const handleAnalyze = async () => {
     if (!file) return
+    console.log("Analyzing content. API URL configured as:", API || "(relative path)")
     setLoading(true)
     setError(null)
     const form = new FormData()
