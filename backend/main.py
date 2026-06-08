@@ -19,7 +19,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── Load model once at startup ─────────────────────────────────────────
+# ── Load model once at startup with memory optimizations ────────────────
+import gc
+torch.set_num_threads(1)
+torch.set_grad_enabled(False)
+
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = DeepFakeDetector()
 
@@ -35,6 +39,7 @@ else:
     print(f"WARNING: Model file not found at {MODEL_PATH}. Using untrained model for inference.")
 
 model.to(DEVICE).eval()
+gc.collect()
 grad_cam = GradCAM(model)
 
 TRANSFORM = transforms.Compose([

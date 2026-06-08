@@ -5,7 +5,7 @@ from efficientnet_pytorch import EfficientNet
 class DeepFakeDetector(nn.Module):
     def __init__(self, num_classes=2, dropout=0.4):
         super().__init__()
-        self.backbone = EfficientNet.from_pretrained('efficientnet-b4')
+        self.backbone = EfficientNet.from_name('efficientnet-b4')
         in_features = self.backbone._fc.in_features
         
         self.backbone._fc = nn.Sequential(
