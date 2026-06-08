@@ -2,7 +2,7 @@ import cv2, os
 import numpy as np
 
 # Load Haar cascade once
-cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+cascade_path = os.path.join(cv2.data.haarcascades, 'haarcascade_frontalface_default.xml')
 if not os.path.exists(cascade_path):
     # Fallback or alternative path if needed, but usually cv2.data.haarcascades works
     pass
