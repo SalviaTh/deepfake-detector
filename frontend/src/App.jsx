@@ -4,7 +4,7 @@ import ReactCrop from 'react-image-crop'
 import 'react-image-crop/dist/ReactCrop.css'
 import './App.css'
 
-const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : '')
+const API_BASE = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : 'https://deepfake-detector-backend-wvnp.onrender.com')
 const API = API_BASE.endsWith('/') ? API_BASE.slice(0, -1) : API_BASE
 
 export default function App() {
