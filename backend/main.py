@@ -22,7 +22,6 @@ app.add_middleware(
 # ── Load model once at startup with memory optimizations ────────────────
 import gc
 torch.set_num_threads(1)
-torch.set_grad_enabled(False)
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = DeepFakeDetector()
